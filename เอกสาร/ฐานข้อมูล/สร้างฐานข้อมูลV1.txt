@@ -1,0 +1,189 @@
+-- สร้างฐานข้อมูล
+CREATE DATABASE DormitoryMaintenanceDB;
+USE DormitoryMaintenanceDB;
+
+-- สร้างตาราง Roles (บทบาท)
+CREATE TABLE Roles (
+    role_ID INT(11) PRIMARY KEY,
+    role_Name VARCHAR(50) NOT NULL
+);
+
+-- สร้างตาราง Users (ผู้ใช้)
+CREATE TABLE Users (
+    user_ID INT(11) PRIMARY KEY,
+    user_Name VARCHAR(50) NOT NULL,
+    user_PasswordHash VARCHAR(255) NOT NULL,
+    user_roleID INT(11),
+    FOREIGN KEY (user_roleID) REFERENCES Roles(role_ID)
+);
+
+-- สร้างตาราง Rooms (ห้องพัก)
+CREATE TABLE Rooms (
+    room_ID INT(11) PRIMARY KEY,
+    room_Number VARCHAR(10) NOT NULL
+);
+
+-- สร้างตาราง Residents (ผู้พักอาศัย)
+CREATE TABLE Residents (
+    resi_ID INT(11) PRIMARY KEY,
+    resi_userID INT(11),
+    resi_FirstName VARCHAR(50) NOT NULL,
+    resi_LastName VARCHAR(50) NOT NULL,
+    resi_Email VARCHAR(100) NOT NULL,
+    resi_PhoneNumber VARCHAR(20) NOT NULL,
+    resi_roomID INT(11),
+    FOREIGN KEY (resi_userID) REFERENCES Users(user_ID),
+    FOREIGN KEY (resi_roomID) REFERENCES Rooms(room_ID)
+);
+
+-- สร้างตาราง MaintenanceStaff (เจ้าหน้าที่ซ่อมบำรุง)
+CREATE TABLE MaintenanceStaff (
+    main_ID INT(11) PRIMARY KEY,
+    main_userID INT(11),
+    main_FirstName VARCHAR(50) NOT NULL,
+    main_LastName VARCHAR(50) NOT NULL,
+    main_Email VARCHAR(100) NOT NULL,
+    main_PhoneNumber VARCHAR(20) NOT NULL,
+    main_JobPosition VARCHAR(50) NOT NULL,
+    FOREIGN KEY (main_userID) REFERENCES Users(user_ID)
+);
+
+-- สร้างตาราง LegalEntities (นิติบุคคล)
+CREATE TABLE LegalEntities (
+    lega_ID INT(11) PRIMARY KEY,
+    lega_userID INT(11),
+    lega_FirstName VARCHAR(50) NOT NULL,
+    lega_LastName VARCHAR(50) NOT NULL,
+    lega_Email VARCHAR(100) NOT NULL,
+    lega_PhoneNumber VARCHAR(20) NOT NULL,
+    lega_JobPosition VARCHAR(50) NOT NULL,
+    FOREIGN KEY (lega_userID) REFERENCES Users(user_ID)
+);
+
+-- สร้างตาราง Inventory (คลังวัสดุ)
+CREATE TABLE Inventory (
+    inve_ID INT(11) PRIMARY KEY,
+    inve_Name VARCHAR(100) NOT NULL,
+    inve_Quantity INT NOT NULL,
+    inve_Unit VARCHAR(20) NOT NULL
+);
+
+-- สร้างตาราง MaintenanceRequests (การแจ้งปัญหา)
+CREATE TABLE MaintenanceRequests (
+    mainr_ID INT(11) PRIMARY KEY,
+    mainr_resiID INT(11),
+    mainr_ProblemType VARCHAR(50) NOT NULL,
+    mainr_ProblemDescription TEXT NOT NULL,
+    mainr_ProblemPhoto LONGBLOB,
+    mainr_Status VARCHAR(50) NOT NULL,
+    mainr_RequestDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (mainr_resiID) REFERENCES Residents(resi_ID)
+);
+
+-- สร้างตาราง Notifications (การแจ้งเตือน)
+CREATE TABLE Notifications (
+    noti_ID INT(11) PRIMARY KEY,
+    noti_resiID INT(11),
+    noti_Text TEXT NOT NULL,
+    noti_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (noti_resiID) REFERENCES Residents(resi_ID)
+);
+
+-- สร้างตาราง Reviews (การรีวิว)
+CREATE TABLE Reviews (
+    revi_ID INT(11) PRIMARY KEY,
+    revi_mainrID INT(11),
+    revi_QualityRating INT NOT NULL,
+    revi_SpeedRating INT NOT NULL,
+    revi_ServiceRating INT NOT NULL,
+    revi_Text TEXT NOT NULL,
+    revi_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (revi_mainrID) REFERENCES MaintenanceRequests(mainr_ID)
+);
+
+-- สร้างตาราง MaterialRequests (การเบิกวัสดุ)
+CREATE TABLE MaterialRequests (
+    matr_ID INT(11) PRIMARY KEY,
+    matr_mainID INT(11),
+    matr_inveID INT(11),
+    matr_Quantity INT NOT NULL,
+    matr_Status VARCHAR(50) NOT NULL,
+    matr_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (matr_mainID) REFERENCES MaintenanceStaff(main_ID),
+    FOREIGN KEY (matr_inveID) REFERENCES Inventory(inve_ID)
+);
+
+-- สร้างตาราง PurchaseOrders (ใบสั่งซื้อ)
+CREATE TABLE PurchaseOrders (
+    purc_ID INT(11) PRIMARY KEY,
+    purc_legaID INT(11),
+    purc_inveID INT(11),
+    purc_Quantity INT NOT NULL,
+    purc_Status VARCHAR(50) NOT NULL,
+    purc_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (purc_legaID) REFERENCES LegalEntities(lega_ID),
+    FOREIGN KEY (purc_inveID) REFERENCES Inventory(inve_ID)
+);
+
+-- สร้างตาราง Managers (ผู้จัดการ)
+CREATE TABLE Managers (
+    mana_ID INT(11) PRIMARY KEY,
+    mana_userID INT(11),
+    mana_FirstName VARCHAR(50) NOT NULL,
+    mana_LastName VARCHAR(50) NOT NULL,
+    mana_Email VARCHAR(100) NOT NULL,
+    mana_PhoneNumber VARCHAR(20) NOT NULL,
+    mana_JobPosition VARCHAR(50) NOT NULL,
+    FOREIGN KEY (mana_userID) REFERENCES Users(user_ID)
+);
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง Roles
+INSERT INTO Roles (role_ID, role_Name) VALUES (1, 'Admin'), (2, 'User');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง Users
+INSERT INTO Users (user_ID, user_Name, user_PasswordHash, user_roleID) VALUES 
+(1, 'admin', 'hash1', 1), 
+(2, 'user', 'hash2', 2);
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง Rooms
+INSERT INTO Rooms (room_ID, room_Number) VALUES (1, '101'), (2, '102');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง Residents
+INSERT INTO Residents (resi_ID, resi_userID, resi_FirstName, resi_LastName, resi_Email, resi_PhoneNumber, resi_roomID) VALUES 
+(1, 2, 'John', 'Doe', 'john@example.com', '123456789', 1);
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง MaintenanceStaff
+INSERT INTO MaintenanceStaff (main_ID, main_userID, main_FirstName, main_LastName, main_Email, main_PhoneNumber, main_JobPosition) VALUES 
+(1, 1, 'Jane', 'Smith', 'jane@example.com', '987654321', 'Technician');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง LegalEntities
+INSERT INTO LegalEntities (lega_ID, lega_userID, lega_FirstName, lega_LastName, lega_Email, lega_PhoneNumber, lega_JobPosition) VALUES 
+(1, 1, 'Legal', 'Entity', 'legal@example.com', '111222333', 'Manager');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง Inventory
+INSERT INTO Inventory (inve_ID, inve_Name, inve_Quantity, inve_Unit) VALUES 
+(1, 'Hammer', 10, 'pieces');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง MaintenanceRequests
+INSERT INTO MaintenanceRequests (mainr_ID, mainr_resiID, mainr_ProblemType, mainr_ProblemDescription, mainr_ProblemPhoto, mainr_Status, mainr_RequestDate) VALUES 
+(1, 1, 'Electrical', 'Light not working', NULL, 'Open', '2024-07-07 00:00:00');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง Notifications
+INSERT INTO Notifications (noti_ID, noti_resiID, noti_Text, noti_Date) VALUES 
+(1, 1, 'Your request has been received', '2024-07-07 00:00:00');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง Reviews
+INSERT INTO Reviews (revi_ID, revi_mainrID, revi_QualityRating, revi_SpeedRating, revi_ServiceRating, revi_Text, revi_Date) VALUES 
+(1, 1, 5, 4, 5, 'Great service!', '2024-07-08 00:00:00');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง MaterialRequests
+INSERT INTO MaterialRequests (matr_ID, matr_mainID, matr_inveID, matr_Quantity, matr_Status, matr_Date) VALUES 
+(1, 1, 1, 2, 'Approved', '2024-07-07 00:00:00');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง PurchaseOrders
+INSERT INTO PurchaseOrders (purc_ID, purc_legaID, purc_inveID, purc_Quantity, purc_Status, purc_Date) VALUES 
+(1, 1, 1, 20, 'Pending', '2024-07-07 00:00:00');
+
+-- เพิ่มข้อมูลตัวอย่างในตาราง Managers
+INSERT INTO Managers (mana_ID, mana_userID, mana_FirstName, mana_LastName, mana_Email, mana_PhoneNumber, mana_JobPosition) VALUES 
+(1, 1, 'Manager', 'One', 'manager1@example.com', '123123123', 'Admin');

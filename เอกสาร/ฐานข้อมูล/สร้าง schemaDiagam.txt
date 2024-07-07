@@ -1,0 +1,108 @@
+Table Roles {
+    role_ID int [pk, increment]
+    role_Name varchar(50)
+}
+
+Table Users {
+    user_ID int [pk, increment]
+    user_Name varchar(50)
+    user_PasswordHash varchar(255)
+    user_roleID int [ref: > Roles.role_ID]
+}
+
+Table Rooms {
+    room_ID int [pk, increment]
+    room_Number varchar(10)
+}
+
+Table Residents {
+    resi_ID int [pk, increment]
+    resi_userID int [ref: > Users.user_ID]
+    resi_FirstName varchar(50)
+    resi_LastName varchar(50)
+    resi_Email varchar(100)
+    resi_PhoneNumber varchar(20)
+    resi_roomID int [ref: > Rooms.room_ID]
+}
+
+Table MaintenanceStaff {
+    main_ID int [pk, increment]
+    main_userID int [ref: > Users.user_ID]
+    main_FirstName varchar(50)
+    main_LastName varchar(50)
+    main_Email varchar(100)
+    main_PhoneNumber varchar(20)
+    main_JobPosition varchar(50)
+}
+
+Table LegalEntities {
+    lega_ID int [pk, increment]
+    lega_userID int [ref: > Users.user_ID]
+    lega_FirstName varchar(50)
+    lega_LastName varchar(50)
+    lega_Email varchar(100)
+    lega_PhoneNumber varchar(20)
+    lega_JobPosition varchar(50)
+}
+
+Table Inventory {
+    inve_ID int [pk, increment]
+    inve_Name varchar(100)
+    inve_Quantity int
+    inve_Unit varchar(20)
+}
+
+Table MaintenanceRequests {
+    mainr_ID int [pk, increment]
+    mainr_resiID int [ref: > Residents.resi_ID]
+    mainr_ProblemType varchar(50)
+    mainr_ProblemDescription text
+    mainr_ProblemPhoto longblob
+    mainr_Status varchar(50)
+    mainr_RequestDate timestamp
+}
+
+Table Notifications {
+    noti_ID int [pk, increment]
+    noti_resiID int [ref: > Residents.resi_ID]
+    noti_Text text
+    noti_Date timestamp
+}
+
+Table Reviews {
+    revi_ID int [pk, increment]
+    revi_mainrID int [ref: > MaintenanceRequests.mainr_ID]
+    revi_QualityRating int
+    revi_SpeedRating int
+    revi_ServiceRating int
+    revi_Text text
+    revi_Date timestamp
+}
+
+Table MaterialRequests {
+    matr_ID int [pk, increment]
+    matr_mainID int [ref: > MaintenanceStaff.main_ID]
+    matr_inveID int [ref: > Inventory.inve_ID]
+    matr_Quantity int
+    matr_Status varchar(50)
+    matr_Date timestamp
+}
+
+Table PurchaseOrders {
+    purc_ID int [pk, increment]
+    purc_legaID int [ref: > LegalEntities.lega_ID]
+    purc_inveID int [ref: > Inventory.inve_ID]
+    purc_Quantity int
+    purc_Status varchar(50)
+    purc_Date timestamp
+}
+
+Table Managers {
+    mana_ID int [pk, increment]
+    mana_userID int [ref: > Users.user_ID]
+    mana_FirstName varchar(50)
+    mana_LastName varchar(50)
+    mana_Email varchar(100)
+    mana_PhoneNumber varchar(20)
+    mana_JobPosition varchar(50)
+}
